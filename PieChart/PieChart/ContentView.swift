@@ -17,11 +17,11 @@ struct PieSlice: Identifiable {
 
 struct ContentView: View {
     let pieSlices: [PieSlice] = [
-        PieSlice(category: "A", value: 10),
+        PieSlice(category: "A", value: 100),
         PieSlice(category: "B", value: 30),
         PieSlice(category: "C", value: 20),
         PieSlice(category: "D", value: 55),
-        PieSlice(category: "F", value: 30),
+        PieSlice(category: "F", value: 50),
         PieSlice(category: "G", value: 10),
     ]
     var body: some View {
