@@ -29,30 +29,9 @@
 		0FB140452ED1BC5A00C60E43 /* ImageClassificationUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ImageClassificationUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
-/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		0FB140602ED1C44A00C60E43 /* Exceptions for "ImageClassification" folder in "ImageClassificationTests" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				MobileNetV2.mlmodel,
-			);
-			target = 0FB1403A2ED1BC5A00C60E43 /* ImageClassificationTests */;
-		};
-		0FB140612ED1C44A00C60E43 /* Exceptions for "ImageClassification" folder in "ImageClassificationUITests" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				MobileNetV2.mlmodel,
-			);
-			target = 0FB140442ED1BC5A00C60E43 /* ImageClassificationUITests */;
-		};
-/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
-
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		0FB1402D2ED1BC5800C60E43 /* ImageClassification */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-				0FB140602ED1C44A00C60E43 /* Exceptions for "ImageClassification" folder in "ImageClassificationTests" target */,
-				0FB140612ED1C44A00C60E43 /* Exceptions for "ImageClassification" folder in "ImageClassificationUITests" target */,
-			);
 			path = ImageClassification;
 			sourceTree = "<group>";
 		};
