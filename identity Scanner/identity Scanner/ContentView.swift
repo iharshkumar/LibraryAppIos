@@ -15,90 +15,113 @@ struct ContentView: View {
     @State private var uiImage: UIImage?
     @State private var extractedText: String = ""
     
-    // Editable Extracted ID Fields
+    // Extracted fields
     @State private var name: String = ""
     @State private var dob: String = ""
     @State private var idNumber: String = ""
     @State private var address: String = ""
     @State private var gender: String = ""
     
-    @State private var isEditing = false   // NEW: Toggle for editing mode
+    @State private var isEditing = false
+    @State private var showScanAnimation = false
     
     var body: some View {
         
         NavigationView {
+            
             ZStack {
-                LinearGradient(colors: [.indigo.opacity(0.2), .purple.opacity(0.15)],
+                
+                // BEAUTIFUL BACKGROUND
+                LinearGradient(colors: [.purple.opacity(0.25),
+                                        .indigo.opacity(0.25),
+                                        .blue.opacity(0.25)],
                                startPoint: .topLeading,
                                endPoint: .bottomTrailing)
                     .ignoresSafeArea()
                 
                 ScrollView {
-                    VStack(spacing: 25) {
+                    VStack(spacing: 30) {
                         
-                        // Upload Card
+                        // TITLE WITH ANIMATION
+                        Text("🔍 Smart ID Scanner")
+                            .font(.largeTitle.bold())
+                            .foregroundStyle(LinearGradient(colors: [.purple, .indigo], startPoint: .leading, endPoint: .trailing))
+                            .shadow(radius: 5)
+                            .padding(.top)
+                            .scaleEffect(showScanAnimation ? 1.05 : 1)
+                            .animation(.easeInOut(duration: 1).repeatForever(), value: showScanAnimation)
+                        
+                        
+                        // --------------------------
+                        // ID IMAGE PREVIEW UPLOAD
+                        // --------------------------
                         VStack(spacing: 15) {
                             
-                            Text("ID Card Scanner")
-                                .font(.largeTitle.bold())
-                            
-                            if let uiImage {
-                                Image(uiImage: uiImage)
-                                    .resizable()
-                                    .scaledToFit()
-                                    .frame(height: 200)
-                                    .cornerRadius(12)
-                                    .shadow(radius: 8)
-                            } else {
-                                RoundedRectangle(cornerRadius: 16)
-                                    .fill(Color.gray.opacity(0.1))
-                                    .frame(height: 200)
-                                    .overlay(
-                                        VStack(spacing: 10) {
-                                            Image(systemName: "photo.on.rectangle")
-                                                .font(.system(size: 45))
-                                                .foregroundColor(.purple)
-                                            Text("Upload ID Card")
-                                                .foregroundColor(.secondary)
-                                        }
-                                    )
+                            ZStack {
+                                RoundedRectangle(cornerRadius: 20)
+                                    .fill(.white)
+                                    .shadow(color: .black.opacity(0.15), radius: 8)
+                                    .frame(height: 230)
+                                
+                                if let uiImage {
+                                    Image(uiImage: uiImage)
+                                        .resizable()
+                                        .scaledToFit()
+                                        .frame(height: 220)
+                                        .cornerRadius(16)
+                                        .shadow(radius: 10)
+                                        .overlay(scanOverlay)
+                                        .animation(.easeInOut, value: uiImage)
+                                } else {
+                                    VStack(spacing: 12) {
+                                        Image(systemName: "idcard")
+                                            .font(.system(size: 50))
+                                            .foregroundColor(.purple)
+                                        
+                                        Text("Upload ID Card")
+                                            .font(.headline)
+                                            .foregroundColor(.gray)
+                                    }
+                                }
                             }
                             
                             PhotosPicker("Select ID Image",
                                          selection: $selectedImage,
                                          matching: .images)
-                            .onChange(of: selectedImage) { _ in loadImage() }
                             .buttonStyle(.borderedProminent)
+                            .controlSize(.large)
+                            .tint(.purple)
+                            .onChange(of: selectedImage) { _ in loadImage() }
+                            
                         }
-                        .padding()
-                        .background(.white)
-                        .cornerRadius(16)
-                        .shadow(radius: 5)
                         
                         
-                        // Editable Extracted Fields
+                        // --------------------------
+                        // EXTRACTED DETAILS SECTION
+                        // --------------------------
                         if extractedText.isEmpty == false {
-                            VStack(alignment: .leading, spacing: 15) {
+                            
+                            VStack(alignment: .leading, spacing: 20) {
                                 
                                 HStack {
-                                    Text("Extracted Details")
-                                        .font(.title2.bold())
+                                    Text("🧾 Extracted Details")
+                                        .font(.title3.bold())
+                                    
                                     Spacer()
                                     
-                                    // Edit Toggle
-                                    Button(isEditing ? "Done" : "Edit") {
-                                        isEditing.toggle()
+                                    Button(isEditing ? "Save" : "Edit") {
+                                        withAnimation { isEditing.toggle() }
                                     }
                                     .foregroundColor(.blue)
                                 }
                                 
-                                infoField(title: "Name", text: $name, icon: "person.text.rectangle", editable: isEditing)
-                                infoField(title: "Date of Birth", text: $dob, icon: "calendar", editable: isEditing)
-                                infoField(title: "ID Number", text: $idNumber, icon: "number", editable: isEditing)
-                                infoField(title: "Gender", text: $gender, icon: "person", editable: isEditing)
+                                detailField("Name", text: $name, icon: "person.crop.circle", editable: isEditing)
+                                detailField("Date of Birth", text: $dob, icon: "calendar", editable: isEditing)
+                                detailField("ID Number", text: $idNumber, icon: "number.square", editable: isEditing)
+                                detailField("Gender", text: $gender, icon: "figure.stand", editable: isEditing)
                                 
-                                VStack(alignment: .leading) {
-                                    Label("Address", systemImage: "house")
+                                VStack(alignment: .leading, spacing: 8) {
+                                    Label("Address", systemImage: "house.fill")
                                         .font(.headline)
                                     
                                     if isEditing {
@@ -106,147 +129,167 @@ struct ContentView: View {
                                             .frame(height: 80)
                                             .padding(8)
                                             .background(Color(.systemGray6))
-                                            .cornerRadius(8)
+                                            .cornerRadius(10)
                                     } else {
                                         Text(address.isEmpty ? "—" : address)
                                             .padding(10)
                                             .frame(maxWidth: .infinity, alignment: .leading)
                                             .background(Color(.systemGray6))
-                                            .cornerRadius(8)
+                                            .cornerRadius(10)
                                     }
                                 }
                                 
                             }
                             .padding()
                             .background(.white)
-                            .cornerRadius(16)
-                            .shadow(radius: 5)
+                            .cornerRadius(20)
+                            .shadow(color: .black.opacity(0.1), radius: 8)
                         }
                         
                         
-                        // Raw OCR text section
+                        // --------------------------
+                        // RAW OCR TEXT
+                        // --------------------------
                         if extractedText.isEmpty == false {
                             VStack(alignment: .leading) {
-                                Text("Raw Extracted OCR Text")
+                                Text("📜 Raw OCR Text")
                                     .font(.headline)
                                 
                                 Text(extractedText)
                                     .font(.footnote)
                                     .padding()
                                     .background(Color(.systemGray5))
-                                    .cornerRadius(10)
+                                    .cornerRadius(12)
                             }
-                            .padding()
+                            .padding(.horizontal)
                         }
                         
                     }
                     .padding()
                 }
             }
-            .navigationTitle("ID Extractor")
+            .navigationBarHidden(true)
+        }
+        .onAppear {
+            showScanAnimation = true
         }
     }
     
     
-    // MARK: - UI Field Component
-    func infoField(title: String, text: Binding<String>, icon: String, editable: Bool) -> some View {
-        VStack(alignment: .leading, spacing: 5) {
+    // --------------------------
+    // SCANNING LINE OVERLAY
+    // --------------------------
+    var scanOverlay: some View {
+        LinearGradient(colors: [.clear, .purple.opacity(0.4), .clear],
+                       startPoint: .top,
+                       endPoint: .bottom)
+            .frame(height: 8)
+            .offset(y: showScanAnimation ? 90 : -90)
+            .animation(Animation.linear(duration: 2).repeatForever(autoreverses: false), value: showScanAnimation)
+    }
+    
+    
+    // --------------------------
+    // STYLIZED FIELD COMPONENT
+    // --------------------------
+    func detailField(_ title: String, text: Binding<String>, icon: String, editable: Bool) -> some View {
+        VStack(alignment: .leading, spacing: 6) {
             Label(title, systemImage: icon)
                 .font(.headline)
             
             if editable {
-                TextField("Enter \(title.lowercased())", text: text)
-                    .textFieldStyle(.roundedBorder)
+                TextField("Enter \(title)", text: text)
+                    .padding(10)
+                    .background(Color(.systemGray6))
+                    .cornerRadius(10)
             } else {
                 Text(text.wrappedValue.isEmpty ? "—" : text.wrappedValue)
                     .padding(10)
-                    .frame(maxWidth: .infinity, alignment: .leading)
                     .background(Color(.systemGray6))
-                    .cornerRadius(8)
+                    .cornerRadius(10)
             }
         }
     }
     
     
-    // MARK: - OCR + Extraction
-    func extractDetails(from text: String) {
-        
-        func match(_ pattern: String) -> String {
-            let regex = try? NSRegularExpression(pattern: pattern, options: .caseInsensitive)
-            if let result = regex?.firstMatch(in: text, options: [], range: NSRange(text.startIndex..., in: text)),
-               let range = Range(result.range, in: text) {
-                return String(text[range])
-            }
-            return ""
-        }
-        
-        // Extract common fields using patterns + keywords
-        name = match("(?<=name[:\\s]).*")
-        dob = match("(\\d{2}[/-]\\d{2}[/-]\\d{4})")
-        idNumber = match("(?<=id[:\\s]|ID[:\\s]|Reg[:\\s]).*")
-        gender = match("Male|Female|M|F")
-        
-        // Address pattern (rough extraction)
-        address = match("(?<=address[:\\s]).*")
-        
-        // fallback if empty
-        if name.isEmpty {
-            name = findLineStarting(keywords: ["name", "holder", "student"], in: text)
-        }
-        if address.isEmpty {
-            address = findLineStarting(keywords: ["address", "addr"], in: text)
-        }
-    }
-    
-    func findLineStarting(keywords: [String], in text: String) -> String {
-        let lines = text.lowercased().components(separatedBy: .newlines)
-        for (i, line) in lines.enumerated() {
-            if keywords.contains(where: { line.contains($0) }) {
-                return (i + 1 < lines.count) ? lines[i+1] : ""
-            }
-        }
-        return ""
-    }
-
-    
-    // MARK: - OCR Handler
+    // --------------------------
+    // OCR LOGIC
+    // --------------------------
     func extractText(from image: UIImage) {
-        guard let cgImage = image.cgImage else { return }
         
-        let request = VNRecognizeTextRequest { request, _ in
-            guard let results = request.results as? [VNRecognizedTextObservation] else { return }
+        guard let cg = image.cgImage else { return }
+        
+        let request = VNRecognizeTextRequest { req, _ in
+            guard let results = req.results as? [VNRecognizedTextObservation] else { return }
             
-            let text = results.compactMap { $0.topCandidates(1).first?.string }
+            let fullText = results.compactMap { $0.topCandidates(1).first?.string }
                 .joined(separator: "\n")
             
             DispatchQueue.main.async {
-                self.extractedText = text
-                self.extractDetails(from: text)
+                self.extractedText = fullText
+                self.extractDetails(from: fullText)
             }
         }
         
         request.recognitionLevel = .accurate
         
-        let handler = VNImageRequestHandler(cgImage: cgImage, options: [:])
-        DispatchQueue.global(qos: .userInitiated).async {
+        let handler = VNImageRequestHandler(cgImage: cg, options: [:])
+        DispatchQueue.global().async {
             try? handler.perform([request])
         }
     }
     
     
-    // MARK: - Load Selected Image
+    // --------------------------
+    // SMART FIELD EXTRACTION
+    // --------------------------
+    func extractDetails(from text: String) {
+        
+        func match(_ pattern: String) -> String {
+            let regex = try? NSRegularExpression(pattern: pattern, options: [.caseInsensitive])
+            if let m = regex?.firstMatch(in: text, range: NSRange(text.startIndex..., in: text)),
+               let range = Range(m.range, in: text) {
+                return String(text[range])
+            }
+            return ""
+        }
+        
+        name = match("(?<=name[:\\s]).*")
+        dob = match("(\\d{2}[/-]\\d{2}[/-]\\d{4})")
+        idNumber = match("(?<=id[:\\s]|reg[:\\s]|no[:\\s]).*")
+        gender = match("Male|Female|M|F")
+        address = match("(?<=address[:\\s]).*")
+        
+        if name.isEmpty { name = guessFromKeywords(["name", "holder"]) }
+        if address.isEmpty { address = guessFromKeywords(["address", "addr"]) }
+    }
+    
+    func guessFromKeywords(_ keys: [String]) -> String {
+        let lines = extractedText.lowercased().components(separatedBy: .newlines)
+        for (index, line) in lines.enumerated() {
+            if keys.contains(where: { line.contains($0) }) {
+                return index + 1 < lines.count ? lines[index + 1] : ""
+            }
+        }
+        return ""
+    }
+    
+    
+    // --------------------------
+    // IMAGE LOAD
+    // --------------------------
     func loadImage() {
         Task {
             if let data = try? await selectedImage?.loadTransferable(type: Data.self),
-               let image = UIImage(data: data) {
-                self.uiImage = image
-                extractText(from: image)
+               let img = UIImage(data: data) {
+                self.uiImage = img
+                extractText(from: img)
             }
         }
     }
 }
 
+
 #Preview {
     ContentView()
 }
-
