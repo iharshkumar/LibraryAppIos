@@ -1,0 +1,24 @@
+//
+//  ContentView.swift
+//  PushNotification
+//
+//  Created by BATCH01L1-15 on 12/12/25.
+//
+
+import SwiftUI
+
+struct ContentView: View {
+    var body: some View {
+        VStack {
+            Image(systemName: "globe")
+                .imageScale(.large)
+                .foregroundStyle(.tint)
+            Text("Apna Kam sa kam Rakho!")
+        }
+        .padding()
+    }
+}
+
+#Preview {
+    ContentView()
+}
